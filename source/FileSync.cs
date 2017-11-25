@@ -7,47 +7,57 @@ namespace PlaylistSync
     {
         public FileSync( string[] args )
         {
-            //if ( args[0].Equals( "-copy" ) )
+            if ( args == null || args.Length == 0 )
             {
-                Console.Write( "Enter the source playlist path : " );
-                var source = ""; //Console.ReadLine();
-
-                if ( source.Equals( string.Empty ) )
-                {
-                    source = @"C:\Users\Saurabh S\Music\James Blunt";
-                    Console.WriteLine( source );
-                }
-
-                Console.Write( "Enter the destination path : " );
-                var destination = ""; //Console.ReadLine();
-
-                if ( destination.Equals( string.Empty ) )
-                {
-                    destination = @"D:\Dev\PlaylistSync\bin\Music";
-                    Console.Write( destination + "\n\n" );
-                }
-
-                Console.Write( "Enter the playlist fullpath : " );
-                var playlistPath = string.Empty; //Console.ReadLine();
-
-                if ( playlistPath.Equals( string.Empty ) )
-                {
-                    playlistPath = @"C:\Users\Saurabh S\Music\foobar2000";
-                    Console.Write( playlistPath + "\n\n" );
-                }
-
-                Console.WriteLine( $"Total No. of files present in the folder is {GetFilesCount( source )}" );
-
-                if ( !Directory.Exists( source ) )
-                {
-                    throw new Exception( "Source directory does not exist." );
-                }
-
-                foreach ( var file in Directory.GetFiles( playlistPath, "*.m3u" ) )
-                {
-                    CopyFiles( Path.GetFileNameWithoutExtension( file ), GetListOfFilesToCopy( file ), destination );
-                }
+                PrintListOfCommads();
             }
+            if ( args[0].Equals( "-copy" ) )
+            {
+                if ( args.Length >= 3 )
+                    CopyCommand( args[1], args[2] );
+            }
+            if ( args[0].Equals( "-plcopy" ) )
+            {
+                if ( args.Length >= 3 )
+                    PlaylistCopyCommad( args[1], args[2] );
+            }
+            if ( args[0].Equals( "-help" ) )
+            {
+                PrintListOfCommads();
+            }
+        }
+
+        private void PrintListOfCommads()
+        {
+            Console.WriteLine();
+            Console.WriteLine( "-copy [SOURCE] [DESTINATION]\ncopies a source folder to a specified destination folder\n" );
+            Console.WriteLine( "-plclean [PLAYLIST] [DESTINATION]\nread a .m3u files and copy the diff to specified destination folder\n" );
+            Console.WriteLine( "-help\nthis help\n" );
+        }
+
+        private void CopyCommand( string source, string destination )
+        {
+            Console.WriteLine( "Performs a normal copy funcation, you can use the Windows copy instead." );
+
+            if ( !Directory.Exists( source ) )
+            {
+                throw new Exception( "Source directory does not exist." );
+            }
+
+            PerformCopy( source, destination );
+        }
+
+        private void PlaylistCopyCommad( string playlistPath, string destination )
+        {
+            Console.WriteLine( "playlist " + playlistPath );
+            Console.WriteLine( "destination " + destination );
+
+            if ( !Directory.Exists( playlistPath ) )
+            {
+                throw new Exception( "Invalid path to playlist directory." );
+            }
+
+            CopyFilesFromM3UPlaylists( playlistPath, destination );
         }
 
         private string[] GetListOfFilesToCopy( string playlistPath )
@@ -69,7 +79,7 @@ namespace PlaylistSync
             return Directory.GetFiles( source, "*", SearchOption.TopDirectoryOnly ).Length;
         }
 
-        public void PerformCopy( string source, string destination, int filesCount = 0 )
+        public void PerformCopy( string source, string destination )
         {
             var destPath = Path.Combine( destination, GetLastFolderName( source ) );
             CopyFiles( source, destPath );
@@ -96,9 +106,17 @@ namespace PlaylistSync
                     if ( File.Exists( destPath ) )
                         continue;
 
-                    Print( $"Copying {destPath}..." );
+                    Console.WriteLine( $"Copying {destPath}" );
                     File.Copy( file, destPath );
                 }
+            }
+        }
+
+        private void CopyFilesFromM3UPlaylists( string playlistPath, string destination )
+        {
+            foreach ( var file in Directory.GetFiles( playlistPath, "*.m3u" ) )
+            {
+                CopyFiles( Path.GetFileNameWithoutExtension( file ), GetListOfFilesToCopy( file ), destination );
             }
         }
 
@@ -113,28 +131,14 @@ namespace PlaylistSync
                 if ( src.Equals( string.Empty ) )
                     continue;
 
-                var filename = Path.GetFileName( src );
-                var dest = Path.Combine( path, filename );
+                var dest = Path.Combine( path, Path.GetFileName( src ) );
 
                 if ( !File.Exists( src ) || File.Exists( dest ) )
                     continue;
 
-                Console.WriteLine( $"Copying {src}..." );
+                Console.WriteLine( $"Copying {src}" );
                 File.Copy( src, dest );
             }
-        }
-
-        public void Clear( string destination )
-        {
-        }
-
-        public void ClearAll( string destination )
-        {
-        }
-
-        private void Print( string value )
-        {
-            Console.WriteLine( value );
         }
     }
 }

@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace PlaylistSync
+﻿namespace PlaylistSync
 {
     class Program
     {
         static void Main( string[] args )
         {
-            var fileSync = new FileSync( args );
+            new FileSync( args );
         }
     }
 }
